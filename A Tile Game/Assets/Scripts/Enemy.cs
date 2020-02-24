@@ -6,24 +6,27 @@ public class Enemy : MonoBehaviour {
 	public float moveSpeed = 4f;  // enemy move speed when moving
 	public int damageAmount = 10; // probably deal a lot of damage to kill player immediately
 
-	public GameObject stunnedCheck; // what gameobject is the stunnedCheck
+	//public GameObject stunnedCheck; // what gameobject is the stunnedCheck
 
-	public float stunnedTime = 3f;   // how long to wait at a waypoint
+	//public float stunnedTime = 3f;   // how long to wait at a waypoint
 	
-	public string stunnedLayer = "StunnedEnemy";  // name of the layer to put enemy on when stunned
+//	public string stunnedLayer = "StunnedEnemy";  // name of the layer to put enemy on when stunned
 	public string playerLayer = "Player";  // name of the player layer to ignore collisions with when stunned
 	
-	public bool isStunned = false;  // flag for isStunned
+	//public bool isStunned = false;  // flag for isStunned
 	
 	public GameObject[] myWaypoints; // to define the movement waypoints
+    public GameObject enemyExplosion;
 	
 	public float waitAtWaypointTime = 1f;   // how long to wait at a waypoint
 	
 	public bool loopWaypoints = true; // should it loop through the waypoints
 	
 	// SFXs
-	public AudioClip stunnedSFX;
+	//public AudioClip stunnedSFX;
 	public AudioClip attackSFX;
+    public AudioClip hitSFX;
+    public AudioClip deathSound;
 	
 	// private variables below
 	
@@ -38,12 +41,14 @@ public class Enemy : MonoBehaviour {
 	float _moveTime; 
 	float _vx = 0f;
 	bool _moving = true;
+    public float health = 100f;
+
 	
 	// store the layer number the enemy is on (setup in Awake)
 	int _enemyLayer;
 
 	// store the layer number the enemy should be moved to when stunned
-	int _stunnedLayer;
+	//int _stunnedLayer;
 	
 	void Awake() {
 		// get a reference to the components we are going to be changing and store a reference for efficiency purposes
@@ -64,9 +69,9 @@ public class Enemy : MonoBehaviour {
 			_audio = gameObject.AddComponent<AudioSource>();
 		}
 
-		if (stunnedCheck==null) {
+		/*if (stunnedCheck==null) {
 			Debug.LogError("stunnedCheck child gameobject needs to be setup on the enemy");
-		}
+		}*/
 		
 		// setup moving defaults
 		_moveTime = 0f;
@@ -76,23 +81,22 @@ public class Enemy : MonoBehaviour {
 		_enemyLayer = this.gameObject.layer;
 
 		// determine the stunned enemy layer number
-		_stunnedLayer = LayerMask.NameToLayer(stunnedLayer);
+		//_stunnedLayer = LayerMask.NameToLayer(stunnedLayer);
 
 		// make sure collision are off between the playerLayer and the stunnedLayer
 		// which is where the enemy is placed while stunned
-		Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer(playerLayer), _stunnedLayer, true); 
+		//Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer(playerLayer), _stunnedLayer, true); 
 	}
 	
 	// if not stunned then move the enemy when time is > _moveTime
 	void Update () {
-		if (!isStunned)
-		{
+		
 			if (Time.time >= _moveTime) {
 				EnemyMovement();
 			} else {
 				_animator.SetBool("Moving", false);
 			}
-		}
+		
 	}
 	
 	// Move the enemy through its rigidbody based on its waypoints
@@ -153,7 +157,7 @@ public class Enemy : MonoBehaviour {
 	// Attack player
 	void OnTriggerEnter2D(Collider2D collision)
 	{
-		if ((collision.tag == "Player") && !isStunned)
+		if ((collision.tag == "Player"))
 		{
 			CharacterController2D player = collision.gameObject.GetComponent<CharacterController2D>();
 			if (player.playerCanMove) {
@@ -168,9 +172,9 @@ public class Enemy : MonoBehaviour {
 				
 				// apply damage to the player
 				player.ApplyDamage (damageAmount);
-				
-				// stop to enjoy killing the player
-				_moveTime = Time.time + stunnedTime;
+
+                // stop to enjoy killing the player
+                _moveTime = Time.time; //stunnedTime;
 			}
 		}
 	}
@@ -199,9 +203,25 @@ public class Enemy : MonoBehaviour {
 	{
 		_audio.PlayOneShot(clip);
 	}
+
+    public void TakeDamage(float damage)
+    {
+        health -= damage;
+        playSound(hitSFX);
+        if (health <= 0)
+        {
+            Die();
+        }
+    }
 	
+    void Die()
+    {
+        Instantiate(enemyExplosion, transform.position, Quaternion.identity);
+        AudioSource.PlayClipAtPoint(deathSound, Camera.main.transform.position, 1f);
+        Destroy(gameObject);
+    }
 	// setup the enemy to be stunned
-	public void Stunned()
+	/*public void Stunned()
 	{
 		if (!isStunned) 
 		{
@@ -221,10 +241,10 @@ public class Enemy : MonoBehaviour {
 			// start coroutine to stand up eventually
 			StartCoroutine (Stand ());
 		}
-	}
+	}*/
 	
 	// coroutine to unstun the enemy and stand back up
-	IEnumerator Stand()
+	/*IEnumerator Stand()
 	{
 		yield return new WaitForSeconds(stunnedTime); 
 		
@@ -237,5 +257,5 @@ public class Enemy : MonoBehaviour {
 		
 		// provide the player with feedback
 		_animator.SetTrigger("Stand");
-	}
+	}*/
 }

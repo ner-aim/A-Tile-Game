@@ -26,7 +26,7 @@ public class Coin : MonoBehaviour {
 			other.gameObject.GetComponent<CharacterController2D>().CollectCoin(coinValue);
 
 			// destroy the coin
-			DestroyObject(this.gameObject);
+			Destroy(this.gameObject);
 		}
 	}
 

@@ -4,6 +4,10 @@ TextureImporter:
   fileIDToRecycleName:
     21300000: Platform_2
     21300002: nature-paltformer-tileset-16x16_1
+    21300004: Coin
+    21300006: miniPlatform
+    21300008: Sheet_0
+    21300010: Big Platform
   externalObjects: {}
   serializedVersion: 9
   mipmaps:
@@ -97,33 +101,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Platform_2
+      name: Sheet_0
       rect:
         serializedVersion: 2
-        x: 1
-        y: 64
-        width: 46
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 1, y: 2, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: bbc13ac7e54048f43b4d8c5863674d87
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: nature-paltformer-tileset-16x16_1
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 48
-        width: 64
-        height: 64
+        x: 2
+        y: 128
+        width: 44
+        height: 47
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -131,7 +115,27 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f55f4c2cfb5ef3a4ca1d2b2eca88a51b
+      spriteID: 68a12b2b5c9c0004090278eba52d4420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Big Platform
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 128
+        width: 44
+        height: 47
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: deece824e3b16b84da0123339d2e5f99
       vertices: []
       indices: 
       edges: []

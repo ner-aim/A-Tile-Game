@@ -9,15 +9,22 @@ public class CharacterController2D : MonoBehaviour {
 	public float moveSpeed = 3f;
 
 	public float jumpForce = 600f;
+    [Range(0.0f,10.0f)]
+    public float climbSpeed = 3f;
+
+    public float distance;
 
 	// player health
 	public int playerHealth = 1;
 
 	// LayerMask to determine what is considered ground for the player
 	public LayerMask whatIsGround;
+    public LayerMask whatIsLadder;
 
 	// Transform just below feet for checking if player is grounded
 	public Transform groundCheck;
+
+    
 
 	// player can move?
 	// we want this public so other scripts can access it but we don't want to show in editor as it might confuse designer
@@ -47,6 +54,8 @@ public class CharacterController2D : MonoBehaviour {
 	bool facingRight = true;
 	bool isGrounded = false;
 	bool isRunning = false;
+    [SerializeField]
+    bool onLadder = false;
 
 	// store the layer the player is on (setup in Awake)
 	int _playerLayer;
@@ -55,8 +64,9 @@ public class CharacterController2D : MonoBehaviour {
 	int _platformLayer;
 	
 	void Awake () {
-		// get a reference to the components we are going to be changing and store a reference for efficiency purposes
-		_transform = GetComponent<Transform> ();
+        // get a reference to the components we are going to be changing and store a reference for efficiency purposes
+        //onLadder = true;
+        _transform = GetComponent<Transform> ();
 		
 		_rigidbody = GetComponent<Rigidbody2D> ();
 		if (_rigidbody==null) // if Rigidbody is missing
@@ -89,9 +99,10 @@ public class CharacterController2D : MonoBehaviour {
 
 		// determine horizontal velocity change based on the horizontal input
 		_vx = Input.GetAxisRaw ("Horizontal");
+        _vy = Input.GetAxis("Vertical");
 
-		// Determine if running based on the horizontal movement
-		if (_vx != 0) 
+        // Determine if running based on the horizontal movement
+        if (_vx != 0) 
 		{
 			isRunning = true;
 		} else {
@@ -121,6 +132,8 @@ public class CharacterController2D : MonoBehaviour {
 			// play the jump sound
 			PlaySound(jumpSFX);
 		}
+
+
 	
 		// If the player stops jumping mid jump and player is not yet falling
 		// then set the vertical velocity to 0 (he will start to fall from gravity)
@@ -129,13 +142,39 @@ public class CharacterController2D : MonoBehaviour {
 			_vy = 0f;
 		}
 
-		// Change the actual velocity on the rigidbody
-		_rigidbody.velocity = new Vector2(_vx * moveSpeed, _vy);
+        // Change the actual velocity on the rigidbody
+        RaycastHit2D hitInfo = Physics2D.Raycast(_transform.position, Vector2.up, distance, whatIsLadder);
+        if(hitInfo.collider != null)
+        {
+            bool isGoingUp;
+            float up = Input.GetAxis("Vertical");
+            if (up > 0f) { isGoingUp = true;  }
+            else { isGoingUp = false; }
+            if (isGoingUp)
+            {
+                onLadder = true;
+            }
+        } else {
+            onLadder = false;
+        }
 
-		// if moving up then don't collide with platform layer
-		// this allows the player to jump up through things on the platform layer
-		// NOTE: requires the platforms to be on a layer named "Platform"
-		Physics2D.IgnoreLayerCollision(_playerLayer, _platformLayer, (_vy > 0.0f)); 
+
+        if(onLadder == true)
+        {
+            _vy = Input.GetAxis("Vertical");
+            _rigidbody.velocity = new Vector2(_vx * climbSpeed, _vy * climbSpeed);
+            _rigidbody.gravityScale = 0;
+        }
+        if (onLadder == false)
+        {
+            _rigidbody.gravityScale = 2;
+            _rigidbody.velocity = new Vector2(_vx * moveSpeed, _vy);
+        }
+
+        // if moving up then don't collide with platform layer
+        // this allows the player to jump up through things on the platform layer
+        // NOTE: requires the platforms to be on a layer named "Platform"
+        Physics2D.IgnoreLayerCollision(_playerLayer, _platformLayer, (_vy > 0.0f)); 
 	}
 
 	// Checking to see if the sprite should be flipped
@@ -144,24 +183,35 @@ public class CharacterController2D : MonoBehaviour {
 	void LateUpdate()
 	{
 		// get the current scale
-		Vector3 localScale = _transform.localScale;
+		//Vector3 localScale = _transform.localScale;
 
-		if (_vx > 0) // moving right so face right
+		/*if (_vx > 0) // moving right so face right
 		{
 			facingRight = true;
 		} else if (_vx < 0) { // moving left so face left
 			facingRight = false;
-		}
+		}*/
 
 		// check to see if scale x is right for the player
 		// if not, multiple by -1 which is an easy way to flip a sprite
-		if (((facingRight) && (localScale.x<0)) || ((!facingRight) && (localScale.x>0))) {
-			localScale.x *= -1;
-		}
+		if (_vx > 0 && !facingRight) {
+            //localScale.x *= -1;
+            Flip();
+		} else if (_vx < 0 && facingRight) {
+            Flip();
+        }
+   
+        
 
 		// update the scale
-		_transform.localScale = localScale;
+		//_transform.localScale = localScale;
 	}
+
+    void Flip()
+    {
+        facingRight = !facingRight;
+        _transform.Rotate(0f, 180f, 0f);
+    }
 
 	// if the player collides with a MovingPlatform, then make it a child of that platform
 	// so it will go for a ride on the MovingPlatform
@@ -172,6 +222,8 @@ public class CharacterController2D : MonoBehaviour {
 			this.transform.parent = other.transform;
 		}
 	}
+
+   
 
 	// if the player exits a collision with a moving platform, then unchild it
 	void OnCollisionExit2D(Collision2D other)
@@ -268,4 +320,6 @@ public class CharacterController2D : MonoBehaviour {
 		_transform.position = spawnloc;
 		_animator.SetTrigger("Respawn");
 	}
+
+    
 }

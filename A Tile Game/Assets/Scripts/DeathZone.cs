@@ -12,7 +12,7 @@ public class DeathZone : MonoBehaviour {
 			// if player then tell the player to do its FallDeath
 			other.gameObject.GetComponent<CharacterController2D>().FallDeath ();
 		} else if (destroyNonPlayerObjects) { // not playe so just kill object - could be falling enemy for example
-			DestroyObject(other.gameObject);
+			Destroy(other.gameObject);
 		}
 	}
 }
